@@ -12,6 +12,8 @@ docker compose up -d --build
 curl --fail http://127.0.0.1:18321/health
 ```
 
+Check the permissions on the environment file. On mounts that ignore Unix mode bits, keep it on a private filesystem with mode 0600 and link .env to it or supply it with Docker Compose’s --env-file option.
+
 The API publishes only on loopback. Change API_PORT in .env if needed. Database access stays on the Compose network. Use `docker compose down` to stop the stack while preserving its data.
 
 ## Exercise the API
