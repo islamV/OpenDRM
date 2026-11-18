@@ -14,7 +14,7 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
     "migrate": "node dist/migrate.js",
-    "test": "npm run build && node --test tests/*.test.mjs"
+    "test": "npm run build && node --test --test-concurrency=1 tests/*.test.mjs"
   },
   "devDependencies": {
     "@types/node": "22.20.5",

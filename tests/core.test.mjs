@@ -33,7 +33,7 @@ test("migration re-entry and database-backed health", async () => {
   assert.equal(
     (await db.query("SELECT count(*)::int AS n FROM schema_migrations")).rows[0]
       .n,
-    2,
+    3,
   );
 });
 test("session issuance, expiry and revocation", async () => {

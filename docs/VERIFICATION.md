@@ -13,3 +13,18 @@ Local run on 18 November 2026. The upstream execution record is in REPOSITORY_AU
 | Live session revoke and validate | 204 followed by 401 |
 
 The tests exercised metadata, access control and the development stack. They did not exercise video packaging, playback, third-party provider credentials, TLS termination, load limits across replicas or physical devices.
+
+## Phase 3
+
+The local Phase 2 Compose database was upgraded in place. The independent disposable PostgreSQL test database exercised clean migrations. The following checks ran with the Phase 3 code.
+
+| Command / check | Observed result |
+|---|---|
+| npm test | TypeScript compiled and nine tests passed, including scoped upload and AES-GCM envelope round-trip and tampering cases |
+| npm audit | Zero known vulnerabilities reported in the locked Node dependencies |
+| docker compose up -d --build --wait | API, PostgreSQL and the private packaging worker started on this Linux x86-64 host |
+| python3 tests/media-smoke.py | Generated an H.264/AAC MP4, uploaded it, inspected DASH PSSH/KID, HLS key tags and fMP4 encryption boxes, rotated the edition, verified its new KID and compared the original output byte-for-byte. Invalid media failed and anonymous requests were rejected |
+| Second worker started with a different test MEDIA_KEK | Startup refused the fingerprint mismatch without changing the registered key |
+| Offline HTML guide | Browser checks covered phone and desktop layout, settings validation, command generation, copy control and saved checklist |
+
+Phase 3 uses private named volumes and a PostgreSQL-backed worker queue. Hardware DRM, content-key delivery to players, HSM/KMS integration and public playback remain outside these checks.

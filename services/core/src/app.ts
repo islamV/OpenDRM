@@ -6,15 +6,18 @@ import { sql } from "drizzle-orm";
 import type pg from "pg";
 import { digest, newSecret } from "./database.js";
 
+import { mediaRoutes } from "./media-api.js";
+
 function bearer(req: FastifyRequest) {
   return /^Bearer ([A-Za-z0-9_-]{43})$/.exec(
     req.headers.authorization ?? "",
   )?.[1];
 }
 
-export async function buildApp(pool: pg.Pool) {
+export async function buildApp(pool: pg.Pool, inputDir = "/media/input") {
   const app = Fastify({
     bodyLimit: 8192,
+    requestTimeout: 300000,
     ajv: { customOptions: { removeAdditional: false } },
   });
   const db = drizzle(pool);
@@ -133,5 +136,6 @@ export async function buildApp(pool: pg.Pool) {
       return result.rows[0] ?? reply.code(404).send();
     },
   );
+  app.register(async (scope) => mediaRoutes(scope, pool, inputDir, principal));
   return app;
 }

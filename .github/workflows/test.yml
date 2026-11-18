@@ -24,3 +24,8 @@ jobs:
       - run: npm ci --ignore-scripts
       - run: npm test
       - run: npm audit --audit-level=high
+      - run: sh infrastructure/setup-media.sh
+      - run: docker compose up -d --build --wait
+      - run: python3 tests/media-smoke.py
+      - if: always()
+        run: docker compose down -v

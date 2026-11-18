@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark"><title>دليل تشغيل الخادم | OpenShield DRM</title>
+<style>
+:root{color-scheme:light;--paper:#f5f6f2;--card:#fff;--ink:#182c26;--muted:#52645c;--line:#d4ded8;--accent:#08664c;--pale:#e2f3e9;--mono:#152820;--code:#dff5e9;--gold:#a4e7b9;font:16px/1.8 system-ui,Tahoma,Arial,sans-serif}
+@media(prefers-color-scheme:dark){:root{color-scheme:dark;--paper:#121c18;--card:#19251f;--ink:#ecf4ec;--muted:#b6c5bc;--line:#3a4a40;--accent:#90e2ad;--pale:#263f31;--mono:#0d1812;--code:#def5e7}}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink)}header{background:#143d30;color:#f5fcf7;border-bottom:5px solid #87d69e}header>div,.wrap{max-width:1220px;margin:auto;padding:32px clamp(16px,4vw,60px)}header>div{padding-block:38px}header p{margin:.3em 0;color:#d3e6d9;max-width:65ch}.brand{font:700 .84rem/1.5 ui-monospace,monospace;letter-spacing:.12em;color:var(--gold);display:inline-block}h1{font-size:clamp(2rem,5vw,3.8rem);margin:.18em 0;line-height:1.35}h2,h3{line-height:1.5;margin:.2em 0 .45em}h2{font-size:1.6rem}h3{font-size:1.05rem}p{margin:.4em 0 .8em}.wrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:26px;align-items:start}aside{position:sticky;top:16px}aside,section{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:22px}nav a{display:block;color:var(--ink);text-decoration:none;padding:.33em .6em;border-radius:6px}nav a:hover,nav a:focus-visible{background:var(--pale);color:var(--accent)}section{margin-bottom:18px;scroll-margin-top:14px}button,input{font:inherit}button{cursor:pointer}a{color:var(--accent)}input:not([type=checkbox]){width:100%;font: .95rem/1.6 ui-monospace,monospace;direction:ltr;color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:7px;padding:8px}input[aria-invalid=true]{border:2px solid #ba493e}.fields{display:grid;grid-template-columns:1fr 1fr;gap:.8em 1.2em}.fields label{font-size:.9rem;font-weight:650}.terminal{background:var(--mono);border-radius:10px;margin:1em 0;overflow:hidden}.bar{display:flex;align-items:center;justify-content:space-between;color:#bad3c2;font-size:.85rem;border-bottom:1px solid #3d5044;padding:6px 12px}.bar button{background:transparent;border:1px solid #668575;color:#e4f8eb;border-radius:5px;padding:0 10px}.bar button:disabled{opacity:.5}pre{margin:0;direction:ltr;text-align:left;overflow:auto;padding:15px;font: .86rem/1.75 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--code);tab-size:2}.tip{background:var(--pale);border-inline-start:3px solid var(--accent);padding:10px 14px;border-radius:6px}.muted,small{color:var(--muted)}.check{display:block;margin:14px 0 0;color:var(--accent);font-weight:650}.check input{accent-color:var(--accent);width:1.1em;height:1.1em;vertical-align:middle}progress{width:100%;height:8px;accent-color:var(--accent)}.progress{border-top:1px solid var(--line);margin-top:1em;padding-top:.7em}code,bdi{overflow-wrap:anywhere}code{direction:ltr;unicode-bidi:isolate}button:focus-visible,a:focus-visible,input:focus-visible,pre:focus-visible{outline:3px solid #389e74;outline-offset:2px}details{border-block-start:1px solid var(--line);padding-top:.8em;margin-top:1em}summary{font-weight:700;cursor:pointer}ul{padding-inline-start:1.4em}footer{text-align:center;color:var(--muted);padding:12px 16px 28px}textarea[hidden]{display:none}@media(max-width:790px){.wrap{display:block;padding-top:16px}aside{position:static;margin-bottom:16px}nav{display:flex;flex-wrap:wrap;gap:.2em}nav a{font-size:.9rem}section,aside{padding:16px}.fields{grid-template-columns:1fr}}@media print{aside,.bar button,.check,footer{display:none}.wrap{display:block;padding:0}section{break-inside:auto}pre{white-space:pre-wrap;overflow-wrap:anywhere}.terminal{break-inside:avoid}}
+</style></head><body>
+<header><div><span class="brand" dir="ltr">OpenShield / DRM</span><h1>دليل تشغيل الخادم</h1><p>من خادم Linux جديد إلى أول ملف فيديو مشفّر. اتبع مسار التثبيت أو الترقية، ثم اختبر الاسترجاع على نسخة منفصلة.</p></div></header>
+<div class="wrap"><aside><nav aria-label="فهرس الدليل"><a href="#settings">إعداد الأوامر</a><a href="#install">التثبيت والترقية</a><a href="#connect">الاتصال الخاص</a><a href="#assets">اختبار فيديو</a><a href="#backup">النسخ الاحتياطي</a><a href="#restore">اختبار الاسترجاع</a><a href="#ops">الصيانة والأعطال</a></nav><div class="progress"><label for="progress" id="count">تقدم التشغيل</label><progress id="progress" value="0" max="6"></progress></div></aside>
+<main><noscript>فعّل JavaScript محلياً في المتصفح لتوليد أوامر الخادم واستخدام أزرار النسخ.</noscript>
+<section id="settings"><h2>إعداد الأوامر</h2><p>أدخل بيانات خادمك لتتحدث الأمثلة تلقائياً. تظل القيم في هذه الصفحة، ويُحفظ تقدم قائمة التحقق على هذا المتصفح عند إتاحة التخزين المحلي.</p><div class="fields">
+<label>اسم الخادم أو عنوان IPv4<input id="host" value="vps.example.com" autocomplete="off" spellcheck="false"></label><label>مستخدم SSH<input id="user" value="deploy" autocomplete="off" spellcheck="false"></label><label>مسار المشروع داخل ‎/srv أو ‎/opt أو ‎/var/www أو ‎/mnt/datahub/web<input id="path" value="/srv/openshield" autocomplete="off" spellcheck="false"></label><label>منفذ خدمة API على الخادم<input id="port" value="18321" inputmode="numeric"></label><label>منفذ SSH<input id="sshport" value="22" inputmode="numeric"></label><label>اسم نطاق HTTPS الداخلي<input id="domain" value="media.internal.example.com" autocomplete="off"></label><label>عنوان الخادم داخل الشبكة الخاصة لـ Caddy<input id="vpn" value="10.8.0.1" autocomplete="off"></label></div><p id="invalid" role="status" class="muted"></p></section>
+<section id="install"><h2>التثبيت والترقية</h2><p>تحتاج إلى خادم Linux، وحساب يملك صلاحية تشغيل Docker، وDocker Engine مع Compose v2 وGit وOpenSSL وPython 3 وcurl وjq. اختَر قرصاً محلياً يدعم أذونات Unix. نفّذ أوامر الخادم في جلسة Bash خاصة.</p><textarea hidden data-title="من جهاز الإدارة">ssh -p {{sshport}} {{user}}@{{host}}</textarea>
+<h3>تثبيت جديد</h3><p>استخدم مساراً جديداً ومخصصاً للتطبيق. خذ المصدر من الفرع <code>openshield</code>، ثم ولّد الأسرار وحدّد المنفذ.</p><textarea hidden data-title="على الخادم · مرة واحدة">set -e
+test ! -e '{{path}}'
+sudo install -d -m 750 -o "$(id -un)" -g "$(id -gn)" '{{path}}'
+(umask 022 && git clone --branch openshield --single-branch https://github.com/islamV/OpenDRM.git '{{path}}')
+</textarea><details><summary>إذا كان قرص المشروع يتجاهل أذونات Unix</summary><p>قبل تشغيل سكربت الإعداد، ضع ملف البيئة على نظام ملفات Linux خاص يدعم الوضع 0600، واربطه بالمشروع. المثال يفترض أن مجلد حسابك على هذا النوع من الأقراص وأن قرص المشروع يدعم الروابط الرمزية. إذا كان <code>.env</code> موجوداً كملف عادي، ينسخ المثال محتواه ويتحقق من تطابق النسختين قبل استبدال الاسم برابط. إذا كان رابطاً بالفعل، راجع مساره وصلاحيات الهدف.</p><textarea hidden data-title="على الخادم · للقرص المشترك فقط">(
+  set -eu
+  cd '{{path}}'
+  test ! -L .env
+  umask 077
+  secrets=$(mktemp -d "$HOME/openshield-secrets-XXXXXXXX")
+  target="$secrets/environment"
+  if test -e .env; then
+    test -f .env
+    install -m 600 .env "$target"
+    cmp -s .env "$target"
+  else
+    install -m 600 /dev/null "$target"
+  fi
+  test "$(stat -c %a "$target")" = 600
+  work=$(mktemp -d .env-link.XXXXXXXX)
+  trap 'rmdir "$work" 2>/dev/null || true' EXIT
+  ln -s "$target" "$work/new"
+  mv -T "$work/new" .env
+)</textarea></details><h3>تهيئة الأسرار والمنفذ</h3><textarea hidden data-title="على الخادم · تثبيت جديد">set -e
+cd '{{path}}'
+umask 077
+sh infrastructure/setup-media.sh
+envfile=$(realpath .env)
+if grep -q '^API_PORT=' "$envfile"; then
+  sed -i 's/^API_PORT=.*/API_PORT={{port}}/' "$envfile"
+else
+  printf '\nAPI_PORT={{port}}\n' >> "$envfile"
+fi
+chmod 600 "$envfile"</textarea>
+<p class="tip">احتفظ بـ <code>DB_PASSWORD</code> و<code>API_DB_PASSWORD</code> و<code>WORKER_DB_PASSWORD</code> و<code>MEDIA_KEK</code> في مخزن أسرار خاص. تُولَّد كقيم سداسية عشرية. يحمي المفتاح الأخير مفاتيح ملفات الفيديو، واستبداله يقطع الوصول إلى المفاتيح السابقة.</p>
+<details><summary>الترقية من المرحلة الثانية</summary><p>خذ نسخة باردة باتباع قسم النسخ الاحتياطي قبل تغيير المصدر. أوقف عمليات الكتابة، واحتفظ بنفس مجلد المشروع واسم مشروع Compose وملف البيئة والمنفذ. تأكد أن شجرة Git نظيفة وأن الفرع الحالي هو <code>openshield</code>. يضيف سكربت الإعداد القيم الناقصة، ويجهّز <code>migrate</code> مخطط قاعدة البيانات وحساب العامل عند الإقلاع.</p><textarea hidden data-title="على الخادم · تثبيت قائم">set -e
+cd '{{path}}'
+test "$(git branch --show-current)" = openshield
+test -z "$(git status --porcelain)"
+git fetch origin openshield
+docker compose stop
+(umask 022 && git merge --ff-only FETCH_HEAD)
+sh infrastructure/setup-media.sh</textarea></details>
+<h3>تشغيل الخدمات</h3><textarea hidden data-title="على الخادم">set -e
+cd '{{path}}'
+docker compose config --quiet
+docker compose up -d --build
+docker compose ps -a
+docker compose logs --tail=40 migrate
+curl --retry 10 --retry-connrefused --retry-delay 2 -fsS http://127.0.0.1:{{port}}/health</textarea><p>تحقق أن <code>migrate</code> خرج برمز صفر وأن <code>db</code> و<code>api</code> و<code>worker</code> تعمل. يقتصر منفذ API على loopback وتبقى قاعدة البيانات داخل شبكة Compose.</p><label class="check"><input type="checkbox" data-step="install"> تحققت من الترحيل وصحة الخدمات</label></section>
+<section id="connect"><h2>الاتصال الخاص</h2><h3>نفق SSH من جهاز الإدارة</h3><p>اسمح بمنفذ SSH من شبكة الإدارة في جدار حماية مزود الخادم وجدار حماية النظام. أبقِ المنفذين الخاصين بواجهة API وPostgreSQL محجوبين من الإنترنت. اترك النفق مفتوحاً واختبره من نافذة ثانية.</p><textarea hidden data-title="جهاز الإدارة · النافذة الأولى">ssh -N -o ExitOnForwardFailure=yes -p {{sshport}} \
+  -L 127.0.0.1:{{port}}:127.0.0.1:{{port}} {{user}}@{{host}}</textarea><textarea hidden data-title="جهاز الإدارة · النافذة الثانية">curl -fsS http://127.0.0.1:{{port}}/health</textarea>
+<details><summary>بديل اختياري لشبكة VPN داخلية باستخدام Caddy وTLS</summary><p>ثبّت Caddy على نظام الخادم. اضبط سجل DNS داخلياً للنطاق على عنوان واجهة VPN الموجودة على الخادم، وراجع سجلات IPv6 أيضاً. اسمح بـ TCP 443 من شبكة VPN فقط، واحجب 80 و443 عن الواجهات العامة في جدارَي الحماية. أضف المقطع التالي إلى Caddyfile القائم. يعتمد المثال على سلطة شهادات Caddy الداخلية.</p><textarea hidden data-title="مقطع Caddyfile">{{domain}} {
+    bind {{vpn}}
+    tls internal
+    reverse_proxy 127.0.0.1:{{port}}
+}</textarea><textarea hidden data-title="على الخادم">sudo caddy validate --config /etc/caddy/Caddyfile && sudo systemctl reload caddy</textarea><p>وزّع الشهادة العامة للجذر على أجهزة الإدارة عبر قناة موثوقة، وتحقق من بصمتها. اختبر الأمر التالي من جهاز متصل بالـVPN بعد تثبيت الجذر في مخزن الثقة.</p><textarea hidden data-title="جهاز داخل VPN">curl -fsS https://{{domain}}/health</textarea><p><a href="https://caddyserver.com/docs/caddyfile/directives/tls">مرجع إعداد TLS في Caddy</a></p></details>
+<label class="check"><input type="checkbox" data-step="connect"> اختبرت الاتصال من جهاز الإدارة</label></section>
+<section id="assets"><h2>اختبار فيديو من الرفع إلى تدوير المفتاح</h2><p>ضع عينة تملكها باسم <code>sample.mp4</code> في المجلد الرئيسي لحسابك على الخادم. الحد الأقصى 128 MiB، والحاوية MP4 بترميز H.264 مع صوت AAC اختياري. نفّذ المقاطع بالترتيب في جلسة Bash واحدة. تنتهي جلسة API بعد 900 ثانية.</p><textarea hidden data-title="إنشاء هوية ناشر وجلسة ومحتوى">set -eo pipefail
+cd '{{path}}'
+base=http://127.0.0.1:{{port}}
+credential=$(docker compose run --rm --no-deps -T migrate node dist/provision.js publisher | jq -er .credential)
+token=$(curl -fsS -X POST -H "Authorization: Bearer $credential" "$base/api/v1/auth/token" | jq -er .token)
+content=$(curl -fsS -H "Authorization: Bearer $token" -H 'Content-Type: application/json' \
+  -d '{"title":"Operator test"}' "$base/api/v1/content" | jq -er .id)</textarea>
+<p>احتفظ ببيانات هوية الناشر في مخزن خاص إن احتجت إليها لاحقاً. أرسل الملف مباشرةً في جسم الطلب، ثم تابع حالة المهمة. يطابق العامل الملف بصاحبه وتقتصر قراءة تفاصيله على المالك.</p>
+<textarea hidden data-title="رفع الملف ومتابعة مهمة المعالجة">result=$(curl -fsS -H "Authorization: Bearer $token" -H 'Content-Type: video/mp4' \
+  --data-binary @"$HOME/sample.mp4" "$base/api/v1/content/$content/assets")
+asset=$(jq -er .assetId <<< "$result")
+job=$(jq -er .jobId <<< "$result")
+status() {
+  curl -fsS -H "Authorization: Bearer $token" "$base/api/v1/jobs/$1" |
+    jq '{id,state,errorCode,outputs}'
+}
+status "$job"</textarea>
+<p>كرر <code>status "$job"</code> حتى تكتمل المهمة. يعرض الحقل <code>outputs</code> التنسيق ومسار ملف البيان داخل تخزين العامل الخاص. تُحفظ المدخلات في <code>/media/input</code> والمخرجات في <code>/media/output</code>. لا تضف أياً من المجلدين إلى خادم الويب. نطاق هذه المرحلة هو التغليف والتشفير الخاصان، وتأتي تراخيص المشاهد والتشغيل في مرحلة لاحقة.</p>
+<textarea hidden data-title="تدوير مفتاح أصل مكتمل">rotation=$(curl -fsS -X POST -H "Authorization: Bearer $token" "$base/api/v1/assets/$asset/rotate")
+rotation_job=$(jq -er .jobId <<< "$rotation")
+status "$rotation_job"</textarea><p>بعد اكتمال مهمة التدوير، أغلق الجلسة وامسح المتغيرات التي تحمل الأسرار.</p><textarea hidden data-title="إنهاء الجلسة">curl -fsS -X DELETE -H "Authorization: Bearer $token" "$base/api/v1/auth/session"
+unset credential token</textarea><label class="check"><input type="checkbox" data-step="assets"> اكتملت مهمتا التغليف وتدوير المفتاح</label></section>
+<section id="backup"><h2>نسخة باردة متسقة</h2><p>احجز نافذة توقف وانتظر انتهاء مهام الفيديو. تجمع النسخة ملف البيئة بجميع أسراره، ومجلدات PostgreSQL والوسائط بكل ملكياتها، وصورة قاعدة البيانات ومراجعة المصدر. نفّذها من نفس مجلد وإعداد Compose المستخدمين في التشغيل. تتطلب مساحة كافية وصلاحيات Docker وشجرة مصدر بلا تغييرات محلية.</p>
+<textarea hidden data-title="على الخادم · يوقف الخدمة مؤقتاً">(
+  set -eu
+  cd '{{path}}'
+  test -z "$(git status --porcelain)"
+  umask 077
+  mkdir -p "$HOME/openshield-backups"
+  backup=$(mktemp -d "$HOME/openshield-backups/backup-XXXXXXXX")
+  db=$(docker compose ps -q db)
+  test -n "$db"
+  project=$(docker inspect -f '{{index .Config.Labels "com.docker.compose.project"}}' "$db")
+  img=$(docker inspect -f '{{.Image}}' "$db")
+  git rev-parse HEAD > "$backup/commit"
+  git bundle create "$backup/source.bundle" HEAD
+  install -m 600 .env "$backup/environment"
+  docker image save "$img" > "$backup/db-image.tar.tmp"
+  docker image inspect -f '{{.Id}}' "$img" > "$backup/db-image-id"
+  mv "$backup/db-image.tar.tmp" "$backup/db-image.tar"
+  docker compose config --volumes > "$backup/volumes"
+  test -s "$backup/volumes"
+  docker compose stop -t 120
+  trap 'docker compose up -d' EXIT
+  while IFS= read -r key; do
+    vol=$(docker volume ls -q --filter "label=com.docker.compose.project=$project" \
+      --filter "label=com.docker.compose.volume=$key")
+    test -n "$vol"
+    docker run --rm --network none -v "$vol:/volume:ro" --entrypoint tar \
+      "$img" -C /volume -czf - . > "$backup/$key.tgz"
+    tar -tzf "$backup/$key.tgz" > /dev/null
+  done < "$backup/volumes"
+  (cd "$backup" && sha256sum *.tgz commit environment volumes source.bundle db-image* > SHA256SUMS)
+  printf '%s\n' "$backup"
+)</textarea><p>احتفظ بمجلد النسخة المطبوع، وانقل نسخة مشفّرة إلى وسيط مستقل محدود الوصول. خزّن بيانات اعتماد الناشرين من مخزن أسرارك، واحتفظ بتكوين Caddy ومخزن شهاداته إذا فعّلته. احفظ أي تعديلات محلية على البنية التحتية منفصلة. تحقّق من عودة <code>/health</code> بعد نافذة التوقف.</p><label class="check"><input type="checkbox" data-step="backup"> أتممت نسخة احتياطية وحفظتها في مكان مستقل</label></section>
+<section id="restore"><h2>اختبار الاسترجاع على مشروع منفصل</h2><p>اختر مجلد نسخة موثوقة من الخطوة السابقة. ينشئ الأمر مجلد تشغيل واسم Compose جديدين ومنفذ loopback مختلفاً عن منفذ التطبيق. تُحمّل صورة PostgreSQL الأصلية وتُستعاد كل وحدة تخزين قبل تشغيل الخدمات. نفّذ الاختبار على خادم Linux بنفس المعمارية وإصدار Docker متوافق.</p><textarea hidden data-title="على خادم الاسترجاع · Bash">(
+  set -eu
+  umask 077
+  read -r -p 'Backup directory: ' backup
+  backup=$(cd "$backup" && pwd)
+  (cd "$backup" && sha256sum -c SHA256SUMS)
+  drill=$(mktemp -d "$HOME/openshield-recovery-XXXXXXXX")
+  project="os-recovery-$(openssl rand -hex 8)"
+  test -z "$(docker volume ls -q --filter "label=com.docker.compose.project=$project")"
+  (umask 022 && git clone --no-checkout "$backup/source.bundle" "$drill/app")
+  cd "$drill/app"
+  (umask 022 && git checkout --detach "$(cat "$backup/commit")")
+  install -m 600 "$backup/environment" .env
+  export API_PORT={{restorePort}}
+  docker image load -i "$backup/db-image.tar"
+  img=$(cat "$backup/db-image-id")
+  docker image tag "$img" "$project-db:restore"
+  printf 'services:\n  db:\n    image: %s-db:restore\n' "$project" > "$drill/db-image.yml"
+  dc() { docker compose -p "$project" -f docker-compose.yml -f "$drill/db-image.yml" "$@"; }
+  printf 'Project: %s\nDirectory: %s\nPort: %s\n' "$project" "$drill" "$API_PORT"
+  dc build
+  dc create
+  while IFS= read -r key; do
+    vol=$(docker volume ls -q --filter "label=com.docker.compose.project=$project" \
+      --filter "label=com.docker.compose.volume=$key")
+    test -n "$vol"
+    docker run --rm -i --network none -v "$vol:/volume" --entrypoint tar \
+      "$img" -C /volume -xzpf - < "$backup/$key.tgz"
+  done < "$backup/volumes"
+  dc up -d
+  dc ps -a
+  curl --retry 10 --retry-connrefused --retry-delay 2 -fsS http://127.0.0.1:{{restorePort}}/health
+  printf '\nProject: %s\nDirectory: %s\nPort: %s\n' "$project" "$drill" "$API_PORT"
+)</textarea><p>باستخدام بيانات اعتماد المالك المحفوظة، استخرج جلسة جديدة من منفذ الاختبار وافحص مهمة معروفة ومخرجاتها، ثم جرّب تدوير ملف قديم على النسخة المستعادة للتحقق من المفتاح. سجّل اسم المشروع والمجلد والمنفذ المطبوع واستعملها عند إيقاف هذا الاختبار. إذا كان المنفذ مشغولاً فاختر منفذاً محلياً متاحاً في أمر الاسترجاع والفحص معاً.</p><label class="check"><input type="checkbox" data-step="restore"> استعدت نسخة منفصلة واختبرت ملفاً سابقاً</label></section>
+<section id="ops"><h2>الصيانة وتشخيص الأعطال</h2><textarea hidden data-title="حالة الخدمات والسعة والسجلات">cd '{{path}}'
+docker compose ps -a
+docker compose logs --tail=80 migrate api worker db
+df -h .
+docker system df
+curl -fsS http://127.0.0.1:{{port}}/health</textarea><ul><li><strong>تعذّر بدء API.</strong> افحص رمز خروج <code>migrate</code> وسجل <code>db</code>، وطابق كلمات المرور مع النسخة المحفوظة عند إنشاء الوحدة.</li><li><strong>الرفع مرفوض.</strong> تحقق من صلاحية جلسة الناشر وملكية المحتوى ونوع الطلب وحجم الملف. يتطلب رفع الوسائط جسماً ثنائياً من نوع <code>video/mp4</code>.</li><li><strong>المهمة متوقفة.</strong> افحص <code>state</code> و<code>errorCode</code> وسجل العامل ومساحة التخزين. أعد اختبار ملف H.264 قصير معروف الصلاحية.</li><li><strong>تحديث الإصدار.</strong> اختبر الاسترجاع أولاً، ثم اتبع مسار الترقية. عند الحاجة للعودة بعد ترحيل مخطط قاعدة البيانات، استرجع النسخة السابقة ومراجعتها في مشروع منفصل.</li><li><strong>توقف مخطط.</strong> استخدم <code>docker compose stop</code>، ثم <code>docker compose up -d</code> لاستئناف الخدمة. يحذف الخيار <code>down -v</code> وحدات التخزين والوسائط.</li></ul><p><a href="https://docs.docker.com/reference/cli/docker/compose/up/">مرجع تشغيل Docker Compose</a></p><label class="check"><input type="checkbox" data-step="ops"> راجعت السجلات والسعة وخطة الصيانة</label></section>
+</main></div><footer><bdi>OpenShield DRM</bdi> · دليل مشغّل الخادم</footer><div id="notice" role="status" aria-live="polite" style="position:absolute;clip-path:inset(50%)"></div>
+<script>
+'use strict';
+const byId=id=>document.getElementById(id);
+const fields=[...document.querySelectorAll('.fields input')];
+const validName=value=>value.length<=253 && value.split('.').every(label=>/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?$/.test(label));
+const ipv4=value=>value.split('.').length===4 && value.split('.').every(o=>/^(0|[1-9]\d{0,2})$/.test(o)&&Number(o)<=255);
+const port=value=>/^[1-9]\d{0,4}$/.test(value)&&Number(value)<=65535;
+const checks={
+  host:v=>/^[\d.]+$/.test(v)?ipv4(v):validName(v),
+  user:v=>/^[a-z_][a-z0-9_-]{0,30}$/.test(v),
+  path:v=>/^\/(srv|opt|var\/www|mnt\/datahub\/web)(\/[a-zA-Z0-9_][a-zA-Z0-9_.-]*)+$/.test(v),
+  port:v=>port(v)&&Number(v)>=1024, sshport:port,
+  domain:v=>v.includes('.')&&validName(v)&&/[a-z]/i.test(v.split('.').at(-1)),
+  vpn:v=>ipv4(v)&&(/^(10\.|192\.168\.)/.test(v)||(/^172\./.test(v)&&Number(v.split('.')[1])>=16&&Number(v.split('.')[1])<=31))
+};
+const snippets=[...document.querySelectorAll('textarea[data-title]')].map(template=>{
+  const box=document.createElement('div'),bar=document.createElement('div'),title=document.createElement('span'),button=document.createElement('button'),pre=document.createElement('pre');
+  box.className='terminal';bar.className='bar';title.textContent=template.dataset.title;pre.tabIndex=0;pre.dir='ltr';button.type='button';button.textContent='نسخ';button.setAttribute('aria-label','نسخ · '+title.textContent);
+  button.addEventListener('click',async()=>{
+    try{
+      if(navigator.clipboard?.writeText){await navigator.clipboard.writeText(pre.textContent);}
+      else{const t=document.createElement('textarea');t.value=pre.textContent;document.body.append(t);t.select();const ok=document.execCommand('copy');t.remove();button.focus();if(!ok)throw Error();}
+      button.textContent='تم النسخ';byId('notice').textContent='نُسخ الأمر '+title.textContent;
+    }catch{const range=document.createRange();range.selectNodeContents(pre);const selection=getSelection();selection.removeAllRanges();selection.addRange(range);button.textContent='اضغط Ctrl+C';}
+    setTimeout(()=>button.textContent='نسخ',2200);
+  });
+  bar.append(title,button);box.append(bar,pre);template.after(box);return {pre,button,source:template.value};
+});
+function render(){
+  const values=Object.fromEntries(fields.map(f=>[f.id,f.value.trim()])); const errors=[];
+  for(const f of fields){const ok=checks[f.id](values[f.id]);f.setAttribute('aria-invalid',String(!ok));if(!ok)errors.push(f.parentElement.firstChild.textContent);}
+  if(values.sshport===values.port) errors.push('اختر منفذين مختلفين لـ SSH وAPI');
+  byId('invalid').textContent=errors.length?'راجع الإعدادات التالية · '+errors.join('، '):'الأوامر جاهزة للنسخ. غيّر القيم النموذجية بما يناسب خادمك.';
+  values.restorePort=String([28321,28322,28323].find(v=>v!==Number(values.port)&&v!==Number(values.sshport)));
+  for(const s of snippets){s.pre.textContent=errors.length?'صحّح الإعدادات لعرض الأمر.':s.source.replace(/\{\{(host|user|path|port|sshport|domain|vpn|restorePort)\}\}/g,(_,k)=>values[k]);s.button.disabled=Boolean(errors.length);}
+}
+fields.forEach(f=>f.addEventListener('input',render));render();
+const steps=[...document.querySelectorAll('[data-step]')],key='openshield.operator.v1.steps';
+try{const saved=JSON.parse(localStorage.getItem(key)||'[]');if(Array.isArray(saved))steps.forEach(c=>c.checked=saved.includes(c.dataset.step));}catch{}
+function progress(){const done=steps.filter(c=>c.checked);byId('progress').max=steps.length;byId('progress').value=done.length;byId('count').textContent='اكتملت '+done.length+' من '+steps.length+' خطوات';try{localStorage.setItem(key,JSON.stringify(done.map(c=>c.dataset.step)));}catch{}}
+steps.forEach(c=>c.addEventListener('change',progress));progress();
+</script></body></html>
