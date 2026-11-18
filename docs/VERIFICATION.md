@@ -28,3 +28,5 @@ The local Phase 2 Compose database was upgraded in place. The independent dispos
 | Offline HTML guide | Browser checks covered phone and desktop layout, settings validation, command generation, copy control and saved checklist |
 
 Phase 3 uses private named volumes and a PostgreSQL-backed worker queue. Hardware DRM, content-key delivery to players, HSM/KMS integration and public playback remain outside these checks.
+
+The server guide's cold backup and restore procedure was exercised between two disposable local Compose projects on separate loopback ports. The restored publisher authenticated, the original job and both manifest records matched, and all six package files matched their SHA-256 digests. The restored key envelope authenticated, and repackaging the restored input generated a new KID. The optional VPN, Caddy and remote VPS steps were not deployed.
