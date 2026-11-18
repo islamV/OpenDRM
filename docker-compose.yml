@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: openshield
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Generate a hex DB_PASSWORD}
+      RUNTIME_PASSWORD: ${API_DB_PASSWORD:?Generate a hex API_DB_PASSWORD}
+    volumes:
+      - data:/var/lib/postgresql/data
+      - ./infrastructure/init-runtime.sh:/docker-entrypoint-initdb.d/01-runtime.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U postgres -d openshield"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+  migrate:
+    build: .
+    command: ["node","dist/migrate.js"]
+    environment:
+      DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@db/openshield
+    depends_on:
+      db: {condition: service_healthy}
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://shield_api:${API_DB_PASSWORD}@db/openshield
+      HOST: 0.0.0.0
+    ports: ["127.0.0.1:${API_PORT:-18321}:3000"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    healthcheck:
+      test: ["CMD","node","-e","fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+volumes:
+  data:

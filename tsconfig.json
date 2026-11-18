@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "strict": true,
+    "rootDir": "services/core/src",
+    "outDir": "dist",
+    "skipLibCheck": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmitOnError": true
+  },
+  "include": ["services/core/src"]
+}
