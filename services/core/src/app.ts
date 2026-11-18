@@ -41,6 +41,12 @@ export async function buildApp(pool: pg.Pool, inputDir = "/media/input") {
         AND s.expires_at>now() AND NOT u.disabled`);
     return result.rows[0]?.id;
   }
+  // Packaging produces encrypted media. License issuance starts in a later phase.
+  app.get("/api/v1/license/capabilities", async () => ({
+    clearkey: false,
+    widevine: false,
+    fairplay: false,
+  }));
   app.get("/health", async (_req, reply) => {
     try {
       await pool.query("SELECT id FROM users LIMIT 0");

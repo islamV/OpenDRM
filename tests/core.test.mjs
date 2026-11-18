@@ -131,3 +131,13 @@ test("token exchange is rate limited", async () => {
     attempts.push((await send("POST", "/api/v1/auth/token")).statusCode);
   assert.ok(attempts.includes(429));
 });
+
+test("public license discovery reports the supported license systems", async () => {
+  const response = await send("GET", "/api/v1/license/capabilities");
+  assert.equal(response.statusCode, 200);
+  assert.deepEqual(response.json(), {
+    clearkey: false,
+    widevine: false,
+    fairplay: false,
+  });
+});
