@@ -30,3 +30,11 @@ The local Phase 2 Compose database was upgraded in place. The independent dispos
 Phase 3 uses private named volumes and a PostgreSQL-backed worker queue. Hardware DRM, content-key delivery to players, HSM/KMS integration and public playback remain outside these checks.
 
 The server guide's cold backup and restore procedure was exercised between two disposable local Compose projects on separate loopback ports. The restored publisher authenticated, the original job and both manifest records matched, and all six package files matched their SHA-256 digests. The restored key envelope authenticated, and repackaging the restored input generated a new KID. The optional VPN, Caddy and remote VPS steps were not deployed.
+
+## Self-hosted playback and Studio
+
+- The Node.js suite passed 13 tests against PostgreSQL.
+- Local Chromium acquired a usable ClearKey CDM key, presented 13 frames in 1.01 seconds and decoded AAC from the encrypted package. The manifest and license returned 200. Byte ranges for both tracks returned 206.
+- The playback smoke test rejected missing credentials, missing or withdrawn entitlement, an unexpected KID, expired and revoked sessions and a revoked media key.
+- A trusted tab blur paused the encrypted player and concealed the video. Refocusing kept the curtain closed. Explicit reveal remained paused until playback resumed.
+- The operator-enabled protected sample acquired a real license. The standalone Studio HTML also played the embedded clear sample offline at mobile width.

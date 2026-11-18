@@ -6,6 +6,8 @@ import { sql } from "drizzle-orm";
 import type pg from "pg";
 import { digest, newSecret } from "./database.js";
 
+import { registerStudio } from "./studio.js";
+import { playbackRoutes } from "./playback.js";
 import { mediaRoutes } from "./media-api.js";
 
 function bearer(req: FastifyRequest) {
@@ -41,12 +43,7 @@ export async function buildApp(pool: pg.Pool, inputDir = "/media/input") {
         AND s.expires_at>now() AND NOT u.disabled`);
     return result.rows[0]?.id;
   }
-  // Packaging produces encrypted media. License issuance starts in a later phase.
-  app.get("/api/v1/license/capabilities", async () => ({
-    clearkey: false,
-    widevine: false,
-    fairplay: false,
-  }));
+  app.register(async (scope) => playbackRoutes(scope, pool, bearer, principal));
   app.get("/health", async (_req, reply) => {
     try {
       await pool.query("SELECT id FROM users LIMIT 0");
@@ -143,5 +140,6 @@ export async function buildApp(pool: pg.Pool, inputDir = "/media/input") {
     },
   );
   app.register(async (scope) => mediaRoutes(scope, pool, inputDir, principal));
+  registerStudio(app, pool);
   return app;
 }

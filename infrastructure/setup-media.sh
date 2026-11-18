@@ -15,13 +15,13 @@ try:
             raise SystemExit('Use a private .env file (0600). A symlink to a private filesystem is supported.')
         previous = path.read_text()
     settings = previous
-    for name in ('DB_PASSWORD','API_DB_PASSWORD','WORKER_DB_PASSWORD','MEDIA_KEK'):
+    for name in ('DB_PASSWORD','API_DB_PASSWORD','WORKER_DB_PASSWORD','MEDIA_KEK','KEYBROKER_TOKEN','KEYBROKER_DB_PASSWORD'):
         pattern = re.compile('^' + name + '=(.*)$',re.M)
         matches = pattern.findall(settings)
         if len(matches) > 1:
             raise SystemExit('Duplicate ' + name)
         if matches and matches[0]:
-            if name in ('WORKER_DB_PASSWORD','MEDIA_KEK') and not re.fullmatch('[a-f0-9]{64}', matches[0]):
+            if name in ('WORKER_DB_PASSWORD','MEDIA_KEK','KEYBROKER_TOKEN','KEYBROKER_DB_PASSWORD') and not re.fullmatch('[a-f0-9]{64}', matches[0]):
                 raise SystemExit('Expected 64 lowercase hex characters in ' + name)
             continue
         value = name + '=' + secrets.token_hex(32)

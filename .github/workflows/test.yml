@@ -27,5 +27,11 @@ jobs:
       - run: sh infrastructure/setup-media.sh
       - run: docker compose up -d --build --wait
       - run: python3 tests/media-smoke.py
+      - name: Test ClearKey playback in Chrome
+        run: |
+          npm install --prefix "$RUNNER_TEMP/openshield-browser" --ignore-scripts playwright@1.62.1
+          export PLAYWRIGHT_MODULE="$RUNNER_TEMP/openshield-browser/node_modules/playwright"
+          export CHROMIUM_PATH="$(command -v google-chrome)"
+          python3 tests/playback-smoke.py
       - if: always()
         run: docker compose down -v

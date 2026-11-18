@@ -33,7 +33,7 @@ test("migration re-entry and database-backed health", async () => {
   assert.equal(
     (await db.query("SELECT count(*)::int AS n FROM schema_migrations")).rows[0]
       .n,
-    3,
+    4,
   );
 });
 test("session issuance, expiry and revocation", async () => {
@@ -136,7 +136,7 @@ test("public license discovery reports the supported license systems", async () 
   const response = await send("GET", "/api/v1/license/capabilities");
   assert.equal(response.statusCode, 200);
   assert.deepEqual(response.json(), {
-    clearkey: false,
+    clearkey: Boolean(process.env.KEYBROKER_URL && process.env.KEYBROKER_TOKEN),
     widevine: false,
     fairplay: false,
   });

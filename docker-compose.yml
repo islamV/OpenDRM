@@ -1,5 +1,6 @@
 services:
   db:
+    networks: [default, playback]
     image: postgres:16-alpine
     environment:
       POSTGRES_DB: openshield
@@ -17,6 +18,7 @@ services:
     build: .
     command: ["node","dist/migrate.js"]
     environment:
+      KEYBROKER_DB_PASSWORD: ${KEYBROKER_DB_PASSWORD:?Run sh infrastructure/setup-media.sh}
       WORKER_DB_PASSWORD: ${WORKER_DB_PASSWORD:?Run sh infrastructure/setup-media.sh}
       DATABASE_URL: postgresql://postgres:${DB_PASSWORD}@db/openshield
     depends_on:
@@ -25,15 +27,37 @@ services:
     build: .
     environment:
       DATABASE_URL: postgresql://shield_api:${API_DB_PASSWORD}@db/openshield
+      KEYBROKER_URL: http://keybroker:3100
+      KEYBROKER_TOKEN: ${KEYBROKER_TOKEN:?Run sh infrastructure/setup-media.sh}
       HOST: 0.0.0.0
     volumes:
       - input:/media/input
+      - output:/media/output:ro
+    networks: [default, playback]
     ports: ["127.0.0.1:${API_PORT:-18321}:3000"]
     depends_on:
+      keybroker: {condition: service_healthy}
       migrate: {condition: service_completed_successfully}
     healthcheck:
       test: ["CMD","node","-e","fetch('http://127.0.0.1:3000/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 5s
+      timeout: 3s
+      retries: 10
+  keybroker:
+    build: .
+    command: ["node","dist/keybroker.js"]
+    environment:
+      DATABASE_URL: postgresql://shield_keybroker:${KEYBROKER_DB_PASSWORD}@db/openshield
+      KEYBROKER_TOKEN: ${KEYBROKER_TOKEN:?Run sh infrastructure/setup-media.sh}
+      MEDIA_KEK: ${MEDIA_KEK:?Run sh infrastructure/setup-media.sh}
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+    networks: [playback]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    healthcheck:
+      test: ["CMD","node","-e","fetch('http://127.0.0.1:3100/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 4s
       timeout: 3s
       retries: 10
   worker:
@@ -58,3 +82,7 @@ volumes:
   input:
   output:
   data:
+
+networks:
+  playback:
+    internal: true

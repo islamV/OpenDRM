@@ -19,4 +19,4 @@ The API streams each authorized upload to a server-generated path, syncs the fil
 
 Each successful packaging run uses an independently generated content key and KID. A random data-encryption key protects the content key with AES-GCM. The local master key wraps the data-encryption key separately, with authenticated context. Each job records its logical key and version. Rotation repackages an asset into a separate edition, preserving earlier output. The source remains on disk for this purpose. Backups and disk encryption must cover the uploads as well as the database, encrypted output and KEK. A production KMS/HSM integration and automatic retention are future work.
 
-Phase 4 introduces per-device playback sessions and scoped license authorization. Widevine and FairPlay require authorized providers and separate integration tests.
+The API authorizes job-scoped ClearKey playback sessions and serves encrypted byte ranges. The internal broker unwraps only the key associated with the authorized job and KID. Per-device binding and licensed Widevine and FairPlay support remain separate milestones.

@@ -1,61 +1,77 @@
 # OpenShield DRM
 
-OpenShield lets publishers upload a video, package it into encrypted DASH and HLS, and produce a new edition with a fresh key. The current release covers private packaging and catalog access through Phase 3. Playback licenses, delivery of media to viewers and protected browser playback are planned.
+A self-hosted video protection stack for encrypted packaging and authorized playback. This independent implementation is developed on the `openshield` branch.
 
-This project lives on the **`openshield` branch** of this repository. The default `main` branch contains the upstream OpenDRM project with a different API and deployment.
+## Features
 
-### Interactive guides in Arabic
+- **Self-hosted ClearKey.** Issue temporary W3C EME licenses on your own server using asset-scoped playback sessions.
+- **Encrypted packaging.** Upload H.264 MP4 with optional AAC and produce CBCS-encrypted DASH and HLS with Shaka Packager. Rotation creates a new edition while preserving prior output.
+- **Player Studio.** Play protected DASH with the bundled Shaka Player. Customize colors, seeking, keyboard controls, speed, volume, full screen, picture-in-picture where supported, and an optional moving watermark.
+- **Privacy curtain.** Pause and black out the player on window blur, tab changes or a manual action. Browser pages have no reliable signal for operating-system screen recording. The watermark is a visible playback overlay.
+- **Operator controls.** Provision publishers and viewers, grant content access, inspect job state and revoke sessions. A separately enabled public demo is scoped to a bundled synthetic lesson.
 
-Download the HTML file using GitHub’s **Download raw file** button and open it in a browser. Both guides work offline.
+## Architecture
 
-- [دليل السيرفر](docs/server-guide-ar.html) — installation, SSH access, uploads, rotation, backups and recovery.
-- [دليل الفرونت ومعاينة المشغّل](docs/frontend-player-ar.html) — try the player controls with an embedded unencrypted video, inspect viewer states and see how a web application connects to the backend.
+```mermaid
+flowchart LR
+    Publisher --> API[OpenShield API]
+    API --> PG[(PostgreSQL)]
+    API --> Input[Private source volume]
+    Worker[Packaging worker] --> PG
+    Input --> Worker
+    Worker --> Output[Private encrypted volume]
+    Output --> API
+    Viewer --> Studio[Player Studio / Shaka]
+    Studio --> API
+    API --> Broker[Internal key broker]
+    Broker --> PG
+```
 
-## Start OpenShield
+The API checks account, entitlement, session, package version and key status before serving media or issuing a license. The broker unwraps only the content key for the requested package. The master wrapping key stays with the worker and broker.
 
-Use a Linux host with Git, Python 3, Docker Engine and Docker Compose. The setup script creates the database credentials and media wrapping key and preserves existing values on subsequent runs.
+## Quick Start
+
+### Prerequisites
+
+Linux, Docker Engine and Docker Compose, Git and Python 3. Use HTTPS for browser playback on a remote hostname. Loopback works for local development.
+
+### Installation
 
 ```sh
 git clone --branch openshield --single-branch https://github.com/islamV/OpenDRM.git openshield-drm
 cd openshield-drm
 sh infrastructure/setup-media.sh
 docker compose up -d --build --wait
+```
+
+The setup script generates missing credentials and preserves existing values. The API binds to `127.0.0.1:18321` by default. Change `API_PORT` in `.env` to use a different port.
+
+### Verify Installation
+
+```sh
 base=http://127.0.0.1:18321
 curl -fsS "$base/health"
 curl -fsS "$base/api/v1/license/capabilities"
 ```
 
-The default API bind is loopback. Set `API_PORT` in `.env` to change the published port and update `base` accordingly. The database, source videos and encrypted packages stay private. Back up `.env` and all three named volumes together. The worker needs the original `MEDIA_KEK` to recover the media keys. For filesystems that ignore Unix permissions, use the private-file symlink procedure in the server guide.
+A running Compose deployment advertises `{"clearkey":true,"widevine":false,"fairplay":false}`. A capabilities response with all flags false indicates the API has no broker configuration. If the path returns 404, verify that the request reaches the `openshield` branch build and compare the loopback and reverse proxy responses.
 
-## What the capabilities response means
+## Usage
 
-`GET /api/v1/license/capabilities` is a public discovery endpoint. This release returns HTTP 200 with the following body:
-
-```json
-{"clearkey":false,"widevine":false,"fairplay":false}
-```
-
-These flags describe **license issuance**. Encrypted packaging can finish successfully while all three flags are false. Use `GET /health` for API/database readiness and the job endpoint for a particular video.
-
-**If you see “Route GET:/api/v1/license/capabilities not found”**, the API that handled the request has no matching route. OpenShield commit `45990bd` and its predecessors omitted this route. On an existing OpenShield checkout, inspect the branch and revision, then update and rebuild:
+### 1. Play the Sample
 
 ```sh
-git status -sb
-git log -1 --oneline
-# On a clean openshield checkout:
-git pull --ff-only origin openshield
-sh infrastructure/setup-media.sh
-docker compose up -d --build --wait
-curl -i "$base/api/v1/license/capabilities"
+docker compose run --rm --no-deps -T migrate node dist/studio-demo.js
 ```
 
-If loopback gives 200 but the domain gives 404, compare the reverse proxy’s upstream host, port and forwarded path with the successful request.
+Open [Player Studio](http://127.0.0.1:18321/player/) and select the protected sample. This operator command enables public playback for the bundled lesson using a dedicated viewer entitlement. Studio also includes a clear local preview for testing layout and controls.
 
-## Publish a video
+### 2. Package Content
 
-Run these examples in one private shell on the server with `jq` installed. Provision a publisher and exchange its credential for a 15-minute session. Store a long-lived publisher credential on a trusted backend.
+Run the following from a private server shell with `jq` installed and an MP4 file named `lesson.mp4`, up to 128 MiB.
 
 ```sh
+base=http://127.0.0.1:18321
 publisher=$(docker compose run --rm --no-deps -T migrate node dist/provision.js publisher | jq -er .credential)
 token=$(curl -fsS -X POST -H "Authorization: Bearer $publisher" "$base/api/v1/auth/token" | jq -er .token)
 auth="Authorization: Bearer $token"
@@ -68,44 +84,84 @@ asset=$(printf '%s' "$upload" | jq -er .assetId)
 curl -fsS -H "$auth" "$base/api/v1/jobs/$job" | jq .
 ```
 
-Supply an MP4 file named `lesson.mp4` containing H.264 video with optional AAC audio, up to 128 MiB. HTTP 202 acknowledges the queue submission. Poll the job until its state is `completed` or `failed`. On success, the output paths resolve inside the worker’s private `/media/output` volume. On failure, inspect `errorCode`.
+A 202 response acknowledges the submission. Poll the job until it reaches `completed` or `failed`. The job returns private storage paths for both output formats. To create a new edition, send an authenticated POST to `/api/v1/assets/$asset/rotate`.
 
-After the first job completes, request rotation and follow the new job. The previous edition remains available in private storage.
+### 3. Authorize a Viewer
 
-```sh
-rotation=$(curl -fsS -X POST -H "$auth" "$base/api/v1/assets/$asset/rotate" | jq -er .jobId)
-curl -fsS -H "$auth" "$base/api/v1/jobs/$rotation" | jq .
-curl -fsS -X DELETE -H "$auth" "$base/api/v1/auth/session"
-unset publisher auth token
-```
+The owner can play a completed job. Other accounts need a content entitlement, managed by the operator in `content_entitlements`. Provision a `viewer` identity for playback users. Authenticate with the provisioned credential on your backend and obtain a user session using `POST /api/v1/auth/token`.
 
-## HTTP API
+### 4. Play Content in a Browser
 
-| Method and path | Access | Purpose |
+For operator testing, enter the job identifier and authorized user session in [Player Studio](http://127.0.0.1:18321/player/). For an application integration, exchange the user session with `POST /api/v1/jobs/:id/playback`. Use the returned `manifestUrl` and `licenseUrl` in Shaka Player and attach the returned playback bearer only to the same-origin request URLs scoped to its session. Playback sessions last at most five minutes and end sooner if the parent session expires. [Shaka Player license authentication](https://shaka-project.github.io/shaka-player/docs/api/tutorial-license-server-auth.html)
+
+## API Reference
+
+| Method | Endpoint | Access or action |
 |---|---|---|
-| GET /health | Public | API/database readiness |
-| GET /api/v1/license/capabilities | Public | Discover available license systems |
-| POST /api/v1/auth/token | Provisioned credential | Exchange credential for a session |
-| POST /api/v1/auth/validate | Session | Check the current authenticated identity |
-| DELETE /api/v1/auth/session | Session | Revoke the current session |
-| POST /api/v1/content | Publisher session | Register content metadata |
-| GET /api/v1/content/:id | Owner or entitled viewer | Read metadata |
-| POST /api/v1/content/:id/assets | Publishing owner | Upload the raw MP4 and enqueue packaging |
-| GET /api/v1/jobs/:id | Content owner | Read job status and output records |
-| POST /api/v1/assets/:id/rotate | Publishing owner | Repackage a completed asset with a new key |
+| GET | `/health` | API and database readiness |
+| GET | `/api/v1/license/capabilities` | Public discovery |
+| POST | `/api/v1/auth/token` | Provisioned credential to user session |
+| POST | `/api/v1/auth/validate` | Inspect the authenticated identity |
+| DELETE | `/api/v1/auth/session` | Revoke the user session |
+| POST | `/api/v1/content` | Publisher creates content |
+| GET | `/api/v1/content/:id` | Owner or entitled viewer reads metadata |
+| POST | `/api/v1/content/:id/assets` | Owner uploads raw MP4 |
+| GET | `/api/v1/jobs/:id` | Owner inspects packaging status |
+| POST | `/api/v1/assets/:id/rotate` | Owner submits key rotation |
+| POST | `/api/v1/jobs/:id/playback` | Authorized viewer starts playback |
+| GET, HEAD | `/api/v1/playback/:id/media/:filename` | Session-bound media with byte ranges |
+| POST | `/api/v1/playback/:id/license` | Temporary ClearKey license for the session KID |
+| DELETE | `/api/v1/playback/:id` | Revoke the playback session |
 
-## Verify a change
+## DRM Support
 
-Use Node 22.12+ and a dedicated PostgreSQL 16 database. Set `TEST_DATABASE_URL` to that disposable database with schema-owner rights. The suite applies migrations and creates fixture rows.
+| System | Status |
+|---|---|
+| **ClearKey** | Self-hosted licenses and DASH browser playback. ClearKey returns the content key to an authorized client. |
+| **Widevine** | Planned. Google offers a License Server SDK for licensed partners that want to operate their own service. [Google Widevine overview](https://developers.google.com/widevine/drm/overview) |
+| **FairPlay Streaming** | Planned. Apple provides a Server SDK for your own Key Server Module and requires approval for deployment credentials. [Apple FairPlay Streaming](https://developer.apple.com/streaming/fps/) |
+
+Shaka Packager also creates encrypted HLS. The bundled browser player uses DASH for its ClearKey playback path.
+
+## Development
+
+Use Node.js 22.12+ and PostgreSQL 16. Set `TEST_DATABASE_URL` to a disposable PostgreSQL database with schema-owner permissions.
 
 ```sh
 npm ci --ignore-scripts
 npm test
 npm audit
+python3 tests/media-smoke.py
 ```
 
-With the Compose stack running, `python3 tests/media-smoke.py` creates a test publisher and sample media, checks both encrypted output formats, rotates the asset, and checks invalid input and anonymous access. To stop the stack while retaining data, run `docker compose down`.
+The smoke test requires a running Compose stack. Run `python3 tests/playback-smoke.py` with Playwright and a Chromium build that supports H.264, AAC and ClearKey CBCS. Set `PLAYWRIGHT_MODULE` and `CHROMIUM_PATH` for external installations.
 
-For development outside Compose, set `DATABASE_URL`, run `npm run build && npm run migrate && npm start`, and use the API on 127.0.0.1:3000. Full packaging requires the worker and its private volumes.
+## Project Structure
 
-[Architecture](ARCHITECTURE.md) · [Implementation plan](IMPLEMENTATION_PLAN.md) · [Verification record](docs/VERIFICATION.md) · [Upstream repository audit](REPOSITORY_AUDIT.md) · [Security audit](SECURITY_AUDIT.md)
+```text
+services/core/src/     HTTP API, playback, broker, and packaging worker
+database/migrations/   PostgreSQL schemas and permissions
+infrastructure/       Environment setup and database bootstrap
+docs/                 Player Studio, samples and operator documentation
+tests/                Unit, HTTP, packaging and browser tests
+docker-compose.yml    Local service orchestration
+```
+
+## Security Considerations
+
+Keys at rest use AES-GCM envelope encryption. Auth and playback tokens are stored as digests. The broker and media volumes are private. Keep the original `.env`, including `MEDIA_KEK`, alongside backups of all three named volumes. Set appropriate HTTPS access controls before exposing an API behind a reverse proxy.
+
+## License
+
+[MIT](LICENSE)
+
+## Contributing
+
+See the [contributing guide](CONTRIBUTING.md) for verification and migration conventions.
+
+## Support and Documentation
+
+- [Interactive server guide in Arabic](docs/server-guide-ar.html)
+- [Player Studio and frontend guide in Arabic](docs/frontend-player-ar.html)
+- [Architecture](ARCHITECTURE.md) and [implementation milestones](IMPLEMENTATION_PLAN.md)
+- [Verification record](docs/VERIFICATION.md) and [security review](SECURITY_AUDIT.md)

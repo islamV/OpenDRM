@@ -4,3 +4,10 @@ node_modules
 dist
 docs
 tests
+
+!docs/
+docs/*
+!docs/player-poster.webp
+!docs/player-live.js
+!docs/frontend-player-ar.html
+!docs/studio-sample.mp4
